@@ -12,6 +12,7 @@ const Profile = require('../../models/Profile');
 const User = require('../../models/User');
 const Post = require('../../models/Post');
 
+// get the users github avatar
 const getGitHubAvatar = async (githubusername) => {
   const uri = encodeURI(`https://api.github.com/users/${githubusername}`);
   const headers = {
@@ -89,7 +90,6 @@ router.post(
       githubusername,
       usegithubavatar
     };
-    console.log('githubavatar', usegithubavatar);
     // Build social object and add to profileFields
     const socialfields = { youtube, twitter, instagram, linkedin, facebook };
 
@@ -103,8 +103,10 @@ router.post(
       // update avatar
       let avatar;
       if (usegithubavatar) {
+        // if usegithubavatar is true get the users github avatar
         avatar = await getGitHubAvatar(githubusername);
       } else {
+        // else use Gravatar
         const user = await User.findOne({ _id: req.user.id });
 
         avatar = normalize(
@@ -116,7 +118,6 @@ router.post(
           { forceHttps: true }
         );
       }
-      console.log('users avatar', avatar);
       // update user's avatar url
       await User.findOneAndUpdate({ _id: req.user.id }, { avatar });
 
