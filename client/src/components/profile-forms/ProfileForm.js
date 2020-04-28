@@ -62,8 +62,11 @@ const ProfileForm = ({
     usegithubavatar
   } = formData;
 
-  const onChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const onChange = (e) => {
+    let { name, value, checked } = e.target;
+    if (name === 'usegithubavatar') value = checked;
+    setFormData({ ...formData, [name]: value });
+  };
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -159,8 +162,7 @@ const ProfileForm = ({
           <input
             type="checkbox"
             name="usegithubavatar"
-            value={usegithubavatar}
-            value={usegithubavatar}
+            checked={usegithubavatar}
             onChange={onChange}
           />
           <label htmlFor="usegithubavatar">

@@ -1,4 +1,5 @@
 const express = require('express');
+const gravatar = require('gravatar');
 const axios = require('axios');
 const config = require('config');
 const router = express.Router();
@@ -11,15 +12,14 @@ const Profile = require('../../models/Profile');
 const User = require('../../models/User');
 const Post = require('../../models/Post');
 
-const setGitHubAvatar = async (user_id, githubusername) => {
+const getGitHubAvatar = async (githubusername) => {
   const uri = encodeURI(`https://api.github.com/users/${githubusername}`);
   const headers = {
     'user-agent': 'node.js',
     Authorization: `token ${config.get('githubToken')}`
   };
   const gitHubResponse = await axios.get(uri, { headers });
-  const avatar = gitHubResponse.data.avatar_url;
-  await User.findOneAndUpdate({ _id: user_id }, { avatar });
+  return gitHubResponse.data.avatar_url;
 };
 
 // @route    GET api/profile/me
@@ -72,7 +72,8 @@ router.post(
       twitter,
       instagram,
       linkedin,
-      facebook
+      facebook,
+      usegithubavatar
     } = req.body;
 
     const profileFields = {
@@ -85,9 +86,10 @@ router.post(
         ? skills
         : skills.split(',').map((skill) => ' ' + skill.trim()),
       status,
-      githubusername
+      githubusername,
+      usegithubavatar
     };
-
+    console.log('githubavatar', usegithubavatar);
     // Build social object and add to profileFields
     const socialfields = { youtube, twitter, instagram, linkedin, facebook };
 
@@ -98,15 +100,33 @@ router.post(
     profileFields.social = socialfields;
 
     try {
+      // update avatar
+      let avatar;
+      if (usegithubavatar) {
+        avatar = await getGitHubAvatar(githubusername);
+      } else {
+        const user = await User.findOne({ _id: req.user.id });
+
+        avatar = normalize(
+          gravatar.url(user.email, {
+            s: '200',
+            r: 'pg',
+            d: 'mm'
+          }),
+          { forceHttps: true }
+        );
+      }
+      console.log('users avatar', avatar);
+      // update user's avatar url
+      await User.findOneAndUpdate({ _id: req.user.id }, { avatar });
+
       // Using upsert option (creates new doc if no match is found):
       let profile = await Profile.findOneAndUpdate(
         { user: req.user.id },
         { $set: profileFields },
         { new: true, upsert: true }
       );
-      if (req.body.usegithubavatar) {
-        setGitHubAvatar(req.user.id, githubusername);
-      }
+
       res.json(profile);
     } catch (err) {
       console.error(err.message);

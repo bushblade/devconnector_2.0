@@ -28,6 +28,10 @@ const ProfileSchema = new mongoose.Schema({
   githubusername: {
     type: String
   },
+  usegithubavatar: {
+    type: Boolean,
+    default: false
+  },
   experience: [
     {
       title: {
