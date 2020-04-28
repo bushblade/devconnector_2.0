@@ -16,7 +16,8 @@ const initialState = {
   facebook: '',
   linkedin: '',
   youtube: '',
-  instagram: ''
+  instagram: '',
+  usegithubavatar: false
 };
 
 const ProfileForm = ({
@@ -57,7 +58,8 @@ const ProfileForm = ({
     facebook,
     linkedin,
     youtube,
-    instagram
+    instagram,
+    usegithubavatar
   } = formData;
 
   const onChange = (e) =>
@@ -152,6 +154,19 @@ const ProfileForm = ({
             If you want your latest repos and a Github link, include your
             username
           </small>
+        </div>
+        <div className="form-group">
+          <input
+            type="checkbox"
+            name="usegithubavatar"
+            value={usegithubavatar}
+            value={usegithubavatar}
+            onChange={onChange}
+          />
+          <label htmlFor="usegithubavatar">
+            {' '}
+            Use GitHub avatar image (requires a valid GitHub account)
+          </label>
         </div>
         <div className="form-group">
           <textarea
