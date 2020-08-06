@@ -9,25 +9,14 @@ import ProfileExperience from './ProfileExperience';
 import ProfileEducation from './ProfileEducation';
 import ProfileGithub from './ProfileGithub';
 import { getProfileById } from '../../actions/profile';
+import useListCycle from '../../hooks/useListCycle';
 
 const Profile = ({ getProfileById, profile: { profile }, auth, match }) => {
   useEffect(() => {
     getProfileById(match.params.id);
   }, [getProfileById, match.params.id]);
 
-  const [current, setCurrent] = useState(0);
-
-  const nextExp = () => {
-    const next = current + 1;
-    if (next < profile.experience.length) setCurrent(next);
-  };
-
-  const prevExp = () => {
-    const prev = current - 1;
-    if (prev >= 0) setCurrent(prev);
-  };
-
-  const currentExp = profile ? profile.experience[current] : null;
+  const exp = useListCycle(profile ? profile.experience : []);
 
   return (
     <Fragment>
@@ -52,17 +41,11 @@ const Profile = ({ getProfileById, profile: { profile }, auth, match }) => {
               <h2 className="text-primary">Experience</h2>
               {profile.experience.length > 0 ? (
                 <Fragment>
-                  <ProfileExperience
-                    key={currentExp._id}
-                    experience={currentExp}
-                  />
-                  <button onClick={prevExp} disabled={current <= 0}>
+                  <ProfileExperience experience={exp.current} />
+                  <button onClick={exp.decrement} disabled={!exp.hasPrev}>
                     Prev
                   </button>
-                  <button
-                    onClick={nextExp}
-                    disabled={current >= profile.experience.length - 1}
-                  >
+                  <button onClick={exp.increment} disabled={!exp.hasNext}>
                     Next
                   </button>
                 </Fragment>
