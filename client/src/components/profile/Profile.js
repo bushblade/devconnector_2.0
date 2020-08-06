@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -14,6 +14,20 @@ const Profile = ({ getProfileById, profile: { profile }, auth, match }) => {
   useEffect(() => {
     getProfileById(match.params.id);
   }, [getProfileById, match.params.id]);
+
+  const [current, setCurrent] = useState(0);
+
+  const nextExp = () => {
+    const next = current + 1;
+    if (next < profile.experience.length) setCurrent(next);
+  };
+
+  const prevExp = () => {
+    const prev = current - 1;
+    if (prev >= 0) setCurrent(prev);
+  };
+
+  const currentExp = profile ? profile.experience[current] : null;
 
   return (
     <Fragment>
@@ -38,12 +52,19 @@ const Profile = ({ getProfileById, profile: { profile }, auth, match }) => {
               <h2 className="text-primary">Experience</h2>
               {profile.experience.length > 0 ? (
                 <Fragment>
-                  {profile.experience.map((experience) => (
-                    <ProfileExperience
-                      key={experience._id}
-                      experience={experience}
-                    />
-                  ))}
+                  <ProfileExperience
+                    key={currentExp._id}
+                    experience={currentExp}
+                  />
+                  <button onClick={prevExp} disabled={current <= 0}>
+                    Prev
+                  </button>
+                  <button
+                    onClick={nextExp}
+                    disabled={current >= profile.experience.length - 1}
+                  >
+                    Next
+                  </button>
                 </Fragment>
               ) : (
                 <h4>No experience credentials</h4>
@@ -54,7 +75,7 @@ const Profile = ({ getProfileById, profile: { profile }, auth, match }) => {
               <h2 className="text-primary">Education</h2>
               {profile.education.length > 0 ? (
                 <Fragment>
-                  {profile.education.map((education) => (
+                  {profile.education.map(education => (
                     <ProfileEducation
                       key={education._id}
                       education={education}
@@ -82,7 +103,7 @@ Profile.propTypes = {
   auth: PropTypes.object.isRequired
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   profile: state.profile,
   auth: state.auth
 });
