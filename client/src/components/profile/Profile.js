@@ -17,6 +17,7 @@ const Profile = ({ getProfileById, profile: { profile }, auth, match }) => {
   }, [getProfileById, match.params.id]);
 
   const exp = useListCycle(profile ? profile.experience : []);
+  const edu = useListCycle(profile ? profile.education : []);
 
   return (
     <Fragment>
@@ -58,12 +59,13 @@ const Profile = ({ getProfileById, profile: { profile }, auth, match }) => {
               <h2 className="text-primary">Education</h2>
               {profile.education.length > 0 ? (
                 <Fragment>
-                  {profile.education.map(education => (
-                    <ProfileEducation
-                      key={education._id}
-                      education={education}
-                    />
-                  ))}
+                  <ProfileEducation education={edu.current} />
+                  <button onClick={edu.decrement} disabled={!edu.hasPrev}>
+                    Prev
+                  </button>
+                  <button onClick={edu.increment} disabled={!edu.hasNext}>
+                    Next
+                  </button>
                 </Fragment>
               ) : (
                 <h4>No education credentials</h4>
