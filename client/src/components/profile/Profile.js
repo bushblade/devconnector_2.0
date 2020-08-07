@@ -16,7 +16,18 @@ const Profile = ({ getProfileById, profile: { profile }, auth, match }) => {
     getProfileById(match.params.id);
   }, [getProfileById, match.params.id]);
 
-  const exp = useListCycle(profile ? profile.experience : []);
+  let sortedExperiences;
+
+  if (profile) {
+    sortedExperiences = profile.experience
+      .map(exp => ({
+        ...exp,
+        sortby: new Date(exp.from)
+      }))
+      .sort((a, b) => b.sortby - a.sortby);
+  }
+
+  const exp = useListCycle(profile ? sortedExperiences : []);
   const edu = useListCycle(profile ? profile.education : []);
 
   return (
